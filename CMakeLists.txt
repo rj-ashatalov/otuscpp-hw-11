@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
 
-function(add_executable_from_dir TARGET SRC_DIR)
-    file(GLOB_RECURSE TARGET_SRC "${SRC_DIR}/*.cpp" "${SRC_DIR}/*.h")
-    add_executable(${TARGET} ${TARGET_SRC})
-endfunction()
-
 project(async VERSION 0.0.$ENV{TRAVIS_BUILD_NUMBER})
 
 find_package(Threads REQUIRED)
@@ -12,13 +7,17 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 configure_file(version.h.in ${PROJECT_SOURCE_DIR}/version.h)
 
-add_executable_from_dir(${PROJECT_NAME} src)
-
 add_executable(test_version tests/test_version.cpp src/Bulkmlt.h)
 
+add_executable(${PROJECT_NAME} "src/libasync.cpp")
+
+file(GLOB_RECURSE TARGET_SRC "src/*.cpp" "src/*.h")
+add_library(libasync SHARED ${TARGET_SRC})
 add_library(patch_version lib.cpp)
 
-set_target_properties(${PROJECT_NAME} patch_version test_version PROPERTIES
+set_target_properties(libasync PROPERTIES PUBLIC_HEADER src/libasync.h)
+
+set_target_properties(${PROJECT_NAME} libasync patch_version test_version PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS "-Wpedantic;-Wall;-Wextra"
@@ -30,6 +29,7 @@ set_target_properties(test_version PROPERTIES
 )
 
 target_link_libraries(${PROJECT_NAME}
+    libasync
     patch_version
     Threads::Threads
 )
@@ -39,10 +39,16 @@ target_link_libraries(test_version
     patch_version
 )
 
+target_include_directories(libasync PRIVATE src)
+
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(test_version PUBLIC src)
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS libasync
+        LIBRARY DESTINATION lib
+        PUBLIC_HEADER DESTINATION lib)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/)
+
 
 set(CPACK_GENERATOR DEB)
 
