@@ -6,24 +6,33 @@
 #include <typeindex>
 #include <queue>
 #include <zconf.h>
-#include "IInterpreterState.h"
 #include "Sequence.h"
 #include "InfinitSequence.h"
 #include "events/EventDispatcher.h"
 
+
 class Sequence;
 
-class Bulk
+struct Metrics
+{
+    int lineCount = 0u;
+    int commandCount = 0u;
+    int blockCount = 0u;
+};
+
+class Bulkmlt
 {
     private:
         std::map<std::type_index, std::shared_ptr<IInterpreterState>> _typeToInterpreter;
 
     public:
 
-        EventDispatcher<Group&> eventSequenceComplete;
+        Metrics mainMetrics;
+
+        EventDispatcher<std::shared_ptr<Group>> eventSequenceComplete;
         EventDispatcher<time_t> eventFirstCommand;
 
-        Bulk(int commandBufCount)
+        Bulkmlt(int commandBufCount)
                 : commandBufCount(commandBufCount)
         {
             SetState<Sequence>();
@@ -57,7 +66,7 @@ class Bulk
 
         void Run()
         {
-            std::cout << __PRETTY_FUNCTION__ << std::endl;
+//            std::cout << __PRETTY_FUNCTION__ << std::endl;
             while (true)
             {
                 std::cout << "Waiting for input:" << std::endl;
@@ -70,6 +79,7 @@ class Bulk
                 }
                 std::cout << "Input is: " << command << " Processing... " << std::endl;
                 _currentState->Exec(command);
+                mainMetrics.lineCount++;
             }
             std::cout << "Input complete aborting" << std::endl;
         };

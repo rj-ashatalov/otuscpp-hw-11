@@ -37,4 +37,7 @@ namespace Utils
         output << static_cast<std::string>(*container.back());
         return output.str();
     }
+
+    size_t FibonacciNaive(const size_t value);
+    size_t FactorialNaive(size_t value);
 }

@@ -5,13 +5,13 @@
 #include <vector>
 #include <memory>
 
-class Bulk;
+class Bulkmlt;
 
 class IInterpreterState
 {
     public:
-        IInterpreterState(Bulk& bulk)
-                : _bulk(bulk)
+        IInterpreterState(Bulkmlt& bulkmlt)
+                : _bulkmlt(bulkmlt)
         {
         }
 
@@ -24,7 +24,7 @@ class IInterpreterState
         virtual void Finalize() {};
 
     protected:
-        Bulk& _bulk;
+        Bulkmlt& _bulkmlt;
 };
 
 
@@ -35,6 +35,7 @@ struct IExpression
     }
 
     virtual operator std::string() const = 0;
+    virtual int Size() const = 0;
 };
 
 struct Command: public IExpression
@@ -44,6 +45,11 @@ struct Command: public IExpression
     virtual operator std::string() const override
     {
         return value;
+    }
+
+    virtual int Size() const override
+    {
+        return 1;
     }
 };
 
@@ -56,4 +62,48 @@ struct Group: public IExpression
     {
         return Utils::Join(expressions, ", ");
     }
+
+    virtual int Size() const override
+    {
+        int result = 0;
+        for (auto&& expression : expressions)
+        {
+            result += expression->Size();
+        }
+        return result;
+    }
+
+    std::vector<std::shared_ptr<Command>> Merge()
+    {
+        std::vector<std::shared_ptr<Command>> result{};
+        if (expressions.size() > 0)
+        {
+            Concat(result, expressions);
+        }
+        return result;
+    }
+
+    private:
+        void Concat(std::vector<std::shared_ptr<Command>>& dest, std::vector<std::shared_ptr<IExpression>>& src)
+        {
+            if (src.size() <= 0)
+            {
+                return;
+            }
+
+            std::for_each(src.begin(), src.end(), [&dest, this](auto& item)
+            {
+                auto command = std::dynamic_pointer_cast<Command>(item);
+                if (command)
+                {
+                    dest.push_back(command);
+                }
+
+                auto group = std::dynamic_pointer_cast<Group>(item);
+                if (group)
+                {
+                    Concat(dest, group->expressions);
+                }
+            });
+        }
 };
