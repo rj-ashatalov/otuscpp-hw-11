@@ -84,6 +84,11 @@ class Bulkmlt
             std::cout << "Input complete aborting" << std::endl;
         };
 
+        void Execute(std::weak_ptr<Bulkmlt> handle, const char* data, std::size_t size)
+        {
+            //TODO @a.shatalov: add to queue, pass event to process
+        }
+
         int commandBufCount;
     private:
         std::shared_ptr<IInterpreterState> _currentState;
