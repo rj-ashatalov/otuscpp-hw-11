@@ -9,13 +9,13 @@ configure_file(version.h.in ${PROJECT_SOURCE_DIR}/version.h)
 
 add_executable(test_version tests/test_version.cpp src/Bulkmlt.h)
 
-add_executable(${PROJECT_NAME} "src/libasync.cpp")
+add_executable(${PROJECT_NAME} "main.cpp")
 
 file(GLOB_RECURSE TARGET_SRC "src/*.cpp" "src/*.h")
 add_library(libasync SHARED ${TARGET_SRC})
 add_library(patch_version lib.cpp)
 
-set_target_properties(libasync PROPERTIES PUBLIC_HEADER src/libasync.h)
+#set_target_properties(libasync PROPERTIES PUBLIC_HEADER src/libasync.h)
 
 set_target_properties(${PROJECT_NAME} libasync patch_version test_version PROPERTIES
     CXX_STANDARD 17
@@ -47,7 +47,8 @@ target_include_directories(test_version PUBLIC src)
 install(TARGETS libasync
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION lib)
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/)
+
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
 
 set(CPACK_GENERATOR DEB)
