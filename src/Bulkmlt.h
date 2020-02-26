@@ -31,6 +31,7 @@ class Bulkmlt
 
         EventDispatcher<std::shared_ptr<Group>> eventSequenceComplete;
         EventDispatcher<time_t> eventFirstCommand;
+        EventDispatcher<std::string> eventCommandPush;
 
         Bulkmlt(int commandBufCount)
                 : commandBufCount(commandBufCount)
@@ -41,7 +42,7 @@ class Bulkmlt
         template<typename T>
         void SetState()
         {
-            if(_currentState)
+            if (_currentState)
             {
                 _currentState->Finalize();
             }
@@ -50,9 +51,8 @@ class Bulkmlt
             auto it = _typeToInterpreter.find(typeIndex);
             if (it == _typeToInterpreter.end())
             {
-                std::tie(it, std::ignore) = _typeToInterpreter.emplace(std::piecewise_construct
-                        , std::make_tuple(typeIndex)
-                        , std::make_tuple(new T{*this}));
+                std::tie(it, std::ignore) = _typeToInterpreter.emplace(std::piecewise_construct, std::make_tuple(typeIndex), std::make_tuple(new T{
+                        *this}));
             }
             _currentState = it->second;
 
@@ -64,7 +64,32 @@ class Bulkmlt
             return _currentState;
         }
 
-        void Run()
+        void Execute(const std::string& command)
+        {
+            _currentState->Exec(command);
+            mainMetrics.lineCount++;
+        }
+
+        void ExecuteAll(const char* data, size_t size)
+        {
+            std::stringstream buffer;
+            buffer << data;
+
+            std::string command;
+            while (true)
+            {
+                std::getline(buffer, command);
+                if (std::cin.eof())
+                {
+                    _currentState->Finalize();
+                    break;
+                }
+//                std::cout << "Input is: " << command << " Processing... " << std::endl;
+                Execute(command);
+            }
+        }
+
+       /* void Run()
         {
 //            std::cout << __PRETTY_FUNCTION__ << std::endl;
             while (true)
@@ -83,11 +108,7 @@ class Bulkmlt
             }
             std::cout << "Input complete aborting" << std::endl;
         };
-
-        void Execute(std::weak_ptr<Bulkmlt> handle, const char* data, std::size_t size)
-        {
-            //TODO @a.shatalov: add to queue, pass event to process
-        }
+*/
 
         int commandBufCount;
     private:
