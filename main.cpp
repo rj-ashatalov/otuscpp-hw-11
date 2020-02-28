@@ -139,7 +139,7 @@ int main(int, char const* argv[])
         threadFileCheck.notify_one();
     });
 
-    bulkmlt.Run();
+    //bulkmlt.Run();
 
     while (!loggerQueue.empty() || !fileQueue.empty())
     {

@@ -26,6 +26,7 @@ namespace async
 
             std::shared_ptr<Bulkmlt> bulk;
             std::condition_variable checkCommandLoop;
+            std::atomic_bool isDone;
 
             Worker(const std::size_t& buffer)
                     : bulk(new Bulkmlt(static_cast<int>(buffer)))
@@ -35,12 +36,12 @@ namespace async
                             std::unique_lock<std::mutex> locker(lockPrint);
                             std::cout << __PRETTY_FUNCTION__ << std::endl;
                         }
-                        while (!_isDone)
+                        while (!isDone)
                         {
                             std::unique_lock<std::mutex> locker(_lockCommandLoop);
                             checkCommandLoop.wait(locker, [&]()
                             {
-                                return !_commandQueue.empty() || _isDone;
+                                return !_commandQueue.empty() || isDone;
                             });
 
                             if (!_commandQueue.empty())
@@ -63,8 +64,12 @@ namespace async
                 checkCommandLoop.notify_one();
             }
 
+            bool IsAllDone()
+            {
+                return _commandQueue.empty();
+            }
+
         private:
-            std::atomic_bool _isDone;
             std::mutex _lockCommandLoop;
 
             std::queue<Command> _commandQueue;
@@ -73,18 +78,31 @@ namespace async
 
     handle_t connect(std::size_t bulk)
     {
-        auto ctx = _contextCatch.emplace_back(new Worker(bulk));
-        return ctx->Add;
+        auto ctx = _contextCache.emplace_back(new Worker(bulk));
+        return ctx.get();
     }
 
     void receive(handle_t handle, const char* data, std::size_t size)
     {
-//        handle->AddCommand(data, size);
+        static_cast<Worker*>(handle)->Add(data, size);
     }
 
     void disconnect(handle_t handle)
     {
-        _contextCatch.erase(std::find(_contextCatch.begin(), _contextCatch.end(), handle));
+        auto* worker = static_cast<Worker*>(handle);
+        while (!worker->IsAllDone())
+        {
+            worker->checkCommandLoop.notify_one();
+        }
+
+        worker->isDone = true;
+        worker->checkCommandLoop.notify_one();
+        worker->join();
+
+        _contextCache.erase(std::find_if(_contextCache.begin(), _contextCache.end(), [handle](auto&& item)
+        {
+            return item.get() == handle;
+        }));
     }
 
 }
