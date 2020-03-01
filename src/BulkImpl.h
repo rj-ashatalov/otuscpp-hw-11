@@ -163,17 +163,22 @@ class BulkImpl
             file1.join();
             file2.join();
 
-            std::cout << "main поток - " << _bulk->mainMetrics.lineCount << " строк, "
-                      << _bulk->mainMetrics.commandCount << " команд, "
-                      << _bulk->mainMetrics.blockCount << " блок" << std::endl;
+            {
+                std::unique_lock<std::mutex> locker(Utils::lockPrint);
+                std::cout << "=== " << std::this_thread::get_id() << " ===" << std::endl;
+                std::cout << "common поток - " << _bulk->mainMetrics.lineCount << " строк, "
+                          << _bulk->mainMetrics.commandCount << " команд, "
+                          << _bulk->mainMetrics.blockCount << " блок" << std::endl;
 
-            std::cout << "log поток - " << logMetrics.blockCount << " блок, "
-                      << logMetrics.commandCount << " команд, " << std::endl;
+                std::cout << "log поток - " << logMetrics.blockCount << " блок, "
+                          << logMetrics.commandCount << " команд, " << std::endl;
 
-            std::cout << "file1 поток - " << fileMetricsOne.blockCount << " блок, "
-                      << fileMetricsOne.commandCount << " команд, " << std::endl;
+                std::cout << "file1 поток - " << fileMetricsOne.blockCount << " блок, "
+                          << fileMetricsOne.commandCount << " команд, " << std::endl;
 
-            std::cout << "file2 поток - " << fileMetricsTwo.blockCount << " блок, "
-                      << fileMetricsTwo.commandCount << " команд, " << std::endl;
+                std::cout << "file2 поток - " << fileMetricsTwo.blockCount << " блок, "
+                          << fileMetricsTwo.commandCount << " команд, " << std::endl;
+                std::cout << "=== " << std::this_thread::get_id() << " ===" << std::endl;
+            }
         }
 };

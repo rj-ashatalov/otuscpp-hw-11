@@ -69,19 +69,28 @@ class Bulkmlt
             mainMetrics.lineCount++;
         }
 
-        void ExecuteAll(const char* data, size_t commandCount)
+        void ExecuteAll(const char* data, size_t size)
         {
             std::stringstream buffer;
             buffer << data;
 
             std::string command;
-            while (commandCount > 0)
+            while (size > 0)
             {
                 std::getline(buffer, command);
+                if (command.empty())
+                {
+                    --size;
+                    continue;
+                }
 //                std::cout << "Input is: " << command << " Processing... " << std::endl;
                 Execute(command);
-                --commandCount;
+                size = (command.size() + 1) >= size? 0u : size - (command.size() + 1);
             }
+        }
+
+        void Finalize()
+        {
             _currentState->Finalize();
         }
 

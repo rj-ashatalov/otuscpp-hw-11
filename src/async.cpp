@@ -58,6 +58,7 @@ namespace async
                                 bulk->ExecuteAll(command.data, command.size);
                             }
                         }
+                        bulk->Finalize();
                         _bulkImpl.Complete();
                     })
             {
