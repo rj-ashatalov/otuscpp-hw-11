@@ -2,7 +2,6 @@
 #include "async.h"
 #include "Bulkmlt.h"
 #include "BulkImpl.h"
-#include <memory>
 
 namespace async
 {
