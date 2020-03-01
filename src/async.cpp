@@ -94,7 +94,7 @@ namespace async
 
     handle_t connect(std::size_t bulk)
     {
-        const auto& ctx = _contextCache.emplace_back(new Worker(bulk));
+        const std::shared_ptr<Worker>& ctx = _contextCache.emplace_back(new Worker(bulk));
         return ctx.get();
     }
 
