@@ -29,7 +29,7 @@ namespace async
             BulkImpl _bulkImpl;
 
             std::condition_variable checkCommandLoop;
-            std::atomic_bool isDone;
+            std::atomic_bool isDone = false;
             std::thread workerThread;
 
             Worker(const std::size_t& buffer)
@@ -38,8 +38,8 @@ namespace async
                     , workerThread([this]()
                     {
                         {
-                            std::unique_lock<std::mutex> locker(lockPrint);
-                            std::cout << __PRETTY_FUNCTION__ << std::endl;
+                            std::unique_lock<std::mutex> locker(Utils::lockPrint);
+                            std::cout << std::this_thread::get_id() << " " << __PRETTY_FUNCTION__ << std::endl;
                         }
                         while (!isDone)
                         {
@@ -58,6 +58,7 @@ namespace async
                                 bulk->ExecuteAll(command.data, command.size);
                             }
                         }
+                        _bulkImpl.Complete();
                     })
             {
             }
@@ -82,7 +83,6 @@ namespace async
 
                 isDone = true;
                 checkCommandLoop.notify_one();
-                _bulkImpl.Complete();
             }
 
         private:

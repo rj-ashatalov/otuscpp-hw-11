@@ -10,7 +10,6 @@
 #include "InfinitSequence.h"
 #include "events/EventDispatcher.h"
 
-
 class Sequence;
 
 struct Metrics

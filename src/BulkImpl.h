@@ -18,7 +18,6 @@ class BulkImpl
     private:
         std::shared_ptr<Bulkmlt> _bulk;
 
-        std::mutex lockPrint;
         std::mutex lockLoggerQueue;
 
         std::mutex lockFileQueue;
@@ -44,8 +43,8 @@ class BulkImpl
         void FileLogWorker(Metrics& fileMetrics)
         {
             {
-                std::unique_lock<std::mutex> locker(lockPrint);
-                std::cout << __PRETTY_FUNCTION__ << std::endl;
+                std::unique_lock<std::mutex> locker(Utils::lockPrint);
+                std::cout << std::this_thread::get_id() << " " << __PRETTY_FUNCTION__ << std::endl;
             }
             while (!isDone)
             {
@@ -77,8 +76,8 @@ class BulkImpl
                 , log([this]()
                 {
                     {
-                        std::unique_lock<std::mutex> locker(lockPrint);
-                        std::cout << __PRETTY_FUNCTION__ << std::endl;
+                        std::unique_lock<std::mutex> locker(Utils::lockPrint);
+                        std::cout << std::this_thread::get_id() << " " << __PRETTY_FUNCTION__ << std::endl;
                     }
                     while (!isDone)
                     {

@@ -8,6 +8,8 @@
 
 namespace Utils
 {
+    extern std::mutex lockPrint;
+
     template<typename T>
     std::string ToString(T value)
     {
