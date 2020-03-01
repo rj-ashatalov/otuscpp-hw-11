@@ -119,18 +119,7 @@ class BulkImpl
                     {
                         logMetrics.blockCount++;
                         logMetrics.commandCount += group->Size();
-
-                        auto commands = group->Merge();
-
-                        std::stringstream output;
-                        std::for_each(commands.begin(), std::prev(commands.end()), [&output](auto& item)
-                        {
-                            output << Utils::FactorialNaive(std::stoi(item->value)) << ", ";
-                        });
-
-                        output << Utils::FactorialNaive(std::stoi(commands.back()->value));
-
-                        consoleLogger.Log("_bulk: " + output.str());
+                        consoleLogger.Log("_bulk: " + static_cast<std::string>(*group));
                     }, group));
                 }
                 threadLogCheck.notify_one();
