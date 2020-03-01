@@ -1,6 +1,7 @@
 #include <thread>
 #include "async.h"
 #include "Bulkmlt.h"
+#include "BulkImpl.h"
 
 namespace async
 {
@@ -25,12 +26,16 @@ namespace async
             };
 
             std::shared_ptr<Bulkmlt> bulk;
+            BulkImpl _bulkImpl;
+
             std::condition_variable checkCommandLoop;
             std::atomic_bool isDone;
+            std::thread workerThread;
 
             Worker(const std::size_t& buffer)
                     : bulk(new Bulkmlt(static_cast<int>(buffer)))
-                    , std::thread([this]()
+                    , _bulkImpl(bulk)
+                    , workerThread([this]()
                     {
                         {
                             std::unique_lock<std::mutex> locker(lockPrint);
@@ -77,12 +82,11 @@ namespace async
 
                 isDone = true;
                 checkCommandLoop.notify_one();
-                join();
+                _bulkImpl.Complete();
             }
 
         private:
             std::mutex _lockCommandLoop;
-
             std::queue<Command> _commandQueue;
     };
 
@@ -95,6 +99,11 @@ namespace async
 
     void receive(handle_t handle, const char* data, std::size_t size)
     {
+        if (handle == nullptr)
+        {
+            return;
+        }
+
         static_cast<Worker*>(handle)->Add(data, size);
     }
 
@@ -102,6 +111,7 @@ namespace async
     {
         auto* worker = static_cast<Worker*>(handle);
         worker->Complete();
+        worker->workerThread.join();
 
         _contextCache.erase(std::find_if(_contextCache.begin(), _contextCache.end(), [handle](auto&& item)
         {

@@ -70,7 +70,7 @@ class Bulkmlt
             mainMetrics.lineCount++;
         }
 
-        void ExecuteAll(const char* data, size_t size)
+        void ExecuteAll(const char* data, size_t)
         {
             std::stringstream buffer;
             buffer << data;
@@ -88,27 +88,6 @@ class Bulkmlt
                 Execute(command);
             }
         }
-
-       /* void Run()
-        {
-//            std::cout << __PRETTY_FUNCTION__ << std::endl;
-            while (true)
-            {
-                std::cout << "Waiting for input:" << std::endl;
-                std::string command;
-                std::getline(std::cin, command);
-                if (std::cin.eof())
-                {
-                    _currentState->Finalize();
-                    break;
-                }
-                std::cout << "Input is: " << command << " Processing... " << std::endl;
-                _currentState->Exec(command);
-                mainMetrics.lineCount++;
-            }
-            std::cout << "Input complete aborting" << std::endl;
-        };
-*/
 
         int commandBufCount;
     private:
