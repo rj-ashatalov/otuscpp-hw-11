@@ -60,13 +60,24 @@ namespace async
             void Add(const char* data, std::size_t size)
             {
                 std::unique_lock<std::mutex> locker(_lockCommandLoop);
+                if (isDone)
+                {
+                    return;
+                }
                 _commandQueue.emplace(data, size);
                 checkCommandLoop.notify_one();
             }
 
-            bool IsAllDone()
+            void Complete()
             {
-                return _commandQueue.empty();
+                while (!_commandQueue.empty())
+                {
+                    checkCommandLoop.notify_one();
+                }
+
+                isDone = true;
+                checkCommandLoop.notify_one();
+                join();
             }
 
         private:
@@ -90,14 +101,7 @@ namespace async
     void disconnect(handle_t handle)
     {
         auto* worker = static_cast<Worker*>(handle);
-        while (!worker->IsAllDone())
-        {
-            worker->checkCommandLoop.notify_one();
-        }
-
-        worker->isDone = true;
-        worker->checkCommandLoop.notify_one();
-        worker->join();
+        worker->Complete();
 
         _contextCache.erase(std::find_if(_contextCache.begin(), _contextCache.end(), [handle](auto&& item)
         {
