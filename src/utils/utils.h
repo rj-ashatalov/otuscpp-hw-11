@@ -5,6 +5,7 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
+#include <mutex>
 
 namespace Utils
 {
