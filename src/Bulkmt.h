@@ -5,10 +5,12 @@
 #include <map>
 #include <typeindex>
 #include <queue>
+#include <mutex>
 #include <zconf.h>
 #include "Sequence.h"
 #include "InfinitSequence.h"
 #include "events/EventDispatcher.h"
+#include "utils/utils.h"
 
 class Sequence;
 
@@ -19,7 +21,7 @@ struct Metrics
     int blockCount = 0u;
 };
 
-class Bulkmlt
+class Bulkmt
 {
     private:
         std::map<std::type_index, std::shared_ptr<IInterpreterState>> _typeToInterpreter;
@@ -32,7 +34,7 @@ class Bulkmlt
         EventDispatcher<time_t> eventFirstCommand;
         EventDispatcher<std::string> eventCommandPush;
 
-        Bulkmlt(int commandBufCount)
+        Bulkmt(int commandBufCount)
                 : commandBufCount(commandBufCount)
         {
             SetState<Sequence>();
