@@ -1,6 +1,6 @@
 #include <thread>
 #include "async.h"
-#include "Bulkmlt.h"
+#include "Bulkmt.h"
 #include "BulkImpl.h"
 
 namespace async
@@ -25,7 +25,7 @@ namespace async
                 std::size_t size;
             };
 
-            std::shared_ptr<Bulkmlt> bulk;
+            std::shared_ptr<Bulkmt> bulk;
             BulkImpl _bulkImpl;
 
             std::condition_variable checkCommandLoop;
@@ -33,7 +33,7 @@ namespace async
             std::thread workerThread;
 
             Worker(const std::size_t& buffer)
-                    : bulk(new Bulkmlt(static_cast<int>(buffer)))
+                    : bulk(new Bulkmt(static_cast<int>(buffer)))
                     , _bulkImpl(bulk)
                     , workerThread([this]()
                     {

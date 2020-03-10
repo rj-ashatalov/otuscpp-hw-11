@@ -7,17 +7,18 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 configure_file(version.h.in ${PROJECT_SOURCE_DIR}/version.h)
 
-add_executable(test_version tests/test_version.cpp src/Bulkmlt.h)
+add_executable(test_version tests/test_version.cpp src/Bulkmt.h)
 
-add_executable(${PROJECT_NAME} "main.cpp")
+set(EXEC_TARGET ${PROJECT_NAME}-exec)
+add_executable(${EXEC_TARGET} "main.cpp")
 
 file(GLOB_RECURSE TARGET_SRC "src/*.cpp" "src/*.h")
-add_library(libasync SHARED ${TARGET_SRC})
+add_library(async SHARED ${TARGET_SRC})
 add_library(patch_version lib.cpp)
 
-set_target_properties(libasync PROPERTIES PUBLIC_HEADER src/async.h)
+set_target_properties(async PROPERTIES PUBLIC_HEADER src/async.h)
 
-set_target_properties(${PROJECT_NAME} libasync patch_version test_version PROPERTIES
+set_target_properties(${EXEC_TARGET} async patch_version test_version PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     COMPILE_OPTIONS "-Wpedantic;-Wall;-Wextra"
@@ -28,8 +29,8 @@ set_target_properties(test_version PROPERTIES
     INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR}
 )
 
-target_link_libraries(${PROJECT_NAME}
-    libasync
+target_link_libraries(${EXEC_TARGET}
+    async
     patch_version
     Threads::Threads
 )
@@ -39,16 +40,16 @@ target_link_libraries(test_version
     patch_version
 )
 
-target_include_directories(libasync PRIVATE src)
+target_include_directories(async PRIVATE src)
 
-target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${EXEC_TARGET} PUBLIC src)
 target_include_directories(test_version PUBLIC src)
 
-install(TARGETS libasync
+install(TARGETS async
         LIBRARY DESTINATION lib
         PUBLIC_HEADER DESTINATION lib)
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+install(TARGETS ${EXEC_TARGET} RUNTIME DESTINATION bin)
 
 
 set(CPACK_GENERATOR DEB)

@@ -22,7 +22,7 @@ int main(int, char *[]) {
      */
 
     //legacy
-    /*auto bulk = std::make_shared<Bulkmlt>(3);
+    /*auto bulk = std::make_shared<Bulkmt>(3);
     BulkImpl impl(bulk);
 
     bulk->ExecuteAll("1\n2\n3\n", 3);

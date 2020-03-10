@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Bulkmlt.h"
+#include "Bulkmt.h"
 #include <iostream>
 #include <regex>
 #include "log/ConsoleLogger.h"
@@ -12,11 +12,12 @@
 #include <functional>
 #include <condition_variable>
 #include <future>
+#include <atomic>
 
 class BulkImpl
 {
     private:
-        std::shared_ptr<Bulkmlt> _bulk;
+        std::shared_ptr<Bulkmt> _bulk;
 
         std::mutex lockLoggerQueue;
 
@@ -25,7 +26,7 @@ class BulkImpl
         std::condition_variable threadLogCheck;
         std::condition_variable threadFileCheck;
 
-        bool isDone = false;
+        std::atomic_bool isDone = false;
 
         std::queue<std::future<void>> loggerQueue;
         std::queue<std::future<int>> fileQueue;
@@ -58,6 +59,7 @@ class BulkImpl
                 {
                     auto file = std::move(fileQueue.front());
                     fileQueue.pop();
+                    locker.unlock();
 
                     fileMetrics.blockCount++;
                     fileMetrics.commandCount += file.get();
@@ -66,7 +68,7 @@ class BulkImpl
         }
 
     public:
-        BulkImpl(std::shared_ptr<Bulkmlt>& bulk)
+        BulkImpl(std::shared_ptr<Bulkmt>& bulk)
                 : _bulk(bulk)
                 , logMetrics{}
                 , fileLogger{}
@@ -91,6 +93,8 @@ class BulkImpl
                         {
                             auto content = std::move(loggerQueue.front());
                             loggerQueue.pop();
+                            locker.unlock();
+
                             content.get();
                         }
                     }
