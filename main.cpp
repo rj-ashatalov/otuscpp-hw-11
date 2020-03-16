@@ -4,6 +4,18 @@
 #include "async.h"
 
 int main(int, char *[]) {
+    //only one
+    /*std::size_t bulk = 3;
+    auto h = async::connect(bulk);
+    char data[] = "0\n1\n2\n3\n";
+    for(auto c: data)
+    {
+        auto cc = new decltype(c){c};
+        async::receive(h, cc, sizeof(*cc));
+        delete cc;
+    }
+    async::disconnect(h);*/
+
     std::size_t bulk = 5;
     auto h = async::connect(bulk);
     auto h2 = async::connect(bulk);

@@ -39,7 +39,7 @@ namespace async
                                 _commandQueue.pop();
                                 locker.unlock();
 
-                                bulk->ExecuteAll(command.data, command.size);
+                                bulk->ExecuteAll(command, command.size());
                             }
                         }
                         bulk->Finalize();
