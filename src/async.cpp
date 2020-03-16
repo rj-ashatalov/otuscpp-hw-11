@@ -7,23 +7,7 @@ namespace async
 {
     struct Worker: public std::thread
     {
-            struct Command
-            {
-                Command(const char* data, std::size_t size)
-                        : data(data)
-                        , size(size)
-                {
-                }
-
-                Command(Command&& other)
-                        : data(std::move(other.data))
-                        , size(std::move(other.size))
-                {
-                }
-
-                const char* data;
-                std::size_t size;
-            };
+            using Command = std::string;
 
             std::shared_ptr<Bulkmt> bulk;
             BulkImpl _bulkImpl;
