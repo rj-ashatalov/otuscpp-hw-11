@@ -12,6 +12,11 @@ namespace async
             std::shared_ptr<Bulkmt> bulk;
             BulkImpl _bulkImpl;
 
+        private:
+            std::mutex _lockCommandLoop;
+            std::queue<Command> _commandQueue;
+
+        public:
             std::condition_variable checkCommandLoop;
             std::atomic_bool isDone = false;
             std::thread workerThread;
@@ -19,6 +24,7 @@ namespace async
             Worker(const std::size_t& buffer)
                     : bulk(new Bulkmt(static_cast<int>(buffer)))
                     , _bulkImpl(bulk)
+                    , _lockCommandLoop()
                     , workerThread([this]()
                     {
                         {
@@ -69,10 +75,6 @@ namespace async
                 isDone = true;
                 checkCommandLoop.notify_one();
             }
-
-        private:
-            std::mutex _lockCommandLoop;
-            std::queue<Command> _commandQueue = {};
     };
 
 
