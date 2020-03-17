@@ -5,7 +5,7 @@
 
 namespace async
 {
-    struct Worker: public std::thread
+    struct Worker
     {
             using Command = std::string;
 
@@ -28,7 +28,7 @@ namespace async
                         while (!isDone)
                         {
                             std::unique_lock<std::mutex> locker(_lockCommandLoop);
-                            checkCommandLoop.wait(locker, [&]()
+                            checkCommandLoop.wait(locker, [this]()
                             {
                                 return !_commandQueue.empty() || isDone;
                             });
@@ -72,7 +72,7 @@ namespace async
 
         private:
             std::mutex _lockCommandLoop;
-            std::queue<Command> _commandQueue;
+            std::queue<Command> _commandQueue = {};
     };
 
 
