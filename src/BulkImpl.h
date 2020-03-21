@@ -133,7 +133,7 @@ class BulkImpl
                 std::lock_guard<std::mutex> lock(lockFileQueue);
 
                 std::stringstream currentTime;
-                currentTime << timestamp << "_" << std::to_string(_bulk->mainMetrics.lineCount);
+                currentTime << timestamp << "_" << std::this_thread::get_id() << "_" << std::to_string(_bulk->mainMetrics.lineCount);
                 fileLogger.PrepareFilename("_bulk" + currentTime.str());
             });
 
