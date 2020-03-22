@@ -153,8 +153,21 @@ class BulkImpl
 
         void Complete()
         {
-            while (!loggerQueue.empty() || !fileQueue.empty())
+            while (true)
             {
+                auto isAllEmpty = true;
+                {
+                    std::unique_lock<std::mutex> fileLocker(lockFileQueue);
+                    isAllEmpty = isAllEmpty && fileQueue.empty();
+                }
+                {
+                    std::unique_lock<std::mutex> loggerLocker(lockLoggerQueue);
+                    isAllEmpty = isAllEmpty && loggerQueue.empty();
+                }
+                if (isAllEmpty)
+                {
+                    break;
+                }
                 threadLogCheck.notify_one();
                 threadFileCheck.notify_one();
             }
@@ -169,7 +182,7 @@ class BulkImpl
 
             {
                 std::unique_lock<std::mutex> locker(Utils::lockPrint);
-                std::cout << "=== " << std::this_thread::get_id() << " ===" << std::endl;
+                std::cerr << "=== " << std::this_thread::get_id() << " ===" << std::endl;
                 std::cerr << "common поток - " << _bulk->mainMetrics.lineCount << " строк, "
                           << _bulk->mainMetrics.commandCount << " команд, "
                           << _bulk->mainMetrics.blockCount << " блок" << std::endl;
@@ -182,7 +195,7 @@ class BulkImpl
 
                 std::cerr << "file2 поток - " << fileMetricsTwo.blockCount << " блок, "
                           << fileMetricsTwo.commandCount << " команд, " << std::endl;
-                std::cout << "=== " << std::this_thread::get_id() << " ===" << std::endl;
+                std::cerr << "=== " << std::this_thread::get_id() << " ===" << std::endl;
             }
         }
 };

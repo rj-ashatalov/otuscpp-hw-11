@@ -67,8 +67,15 @@ namespace async
 
             void Complete()
             {
-                while (!_commandQueue.empty())
+                while (true)
                 {
+                    {
+                        std::unique_lock<std::mutex> locker(_lockCommandLoop);
+                        if (_commandQueue.empty())
+                        {
+                            break;
+                        }
+                    }
                     checkCommandLoop.notify_one();
                 }
 
