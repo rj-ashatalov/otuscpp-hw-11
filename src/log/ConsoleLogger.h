@@ -10,6 +10,6 @@ struct ConsoleLogger
     void Log(std::string message)
     {
         std::lock_guard<std::mutex> lockPrint(Utils::lockPrint);
-        std::cout << message << std::endl;
+        std::cerr << message << std::endl;
     };
 };

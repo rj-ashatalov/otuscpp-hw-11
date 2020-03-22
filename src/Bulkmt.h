@@ -86,11 +86,6 @@ class Bulkmt
             while (size > 0)
             {
                 std::getline(buffer, command);
-                if (command.empty())
-                {
-                    --size;
-                    continue;
-                }
 //                std::cout << "Input is: " << command << " Processing... " << std::endl;
                 Execute(command);
                 size = (command.size() + 1) >= size? 0u : size - (command.size() + 1);

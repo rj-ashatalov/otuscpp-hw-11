@@ -18,7 +18,7 @@ namespace Utils
     }
 
     template<typename T>
-    std::string ToString(std::shared_ptr<T> value)
+    std::string ToString(const std::shared_ptr<T>& value)
     {
         return static_cast<std::string>(*value);
     }

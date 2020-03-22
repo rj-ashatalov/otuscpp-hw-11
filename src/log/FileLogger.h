@@ -25,11 +25,11 @@ struct FileLogger
 
             {
                 std::unique_lock<std::mutex> locker(Utils::lockPrint);
-                std::cout << __PRETTY_FUNCTION__ << " Creating file: " << fileName << std::endl;
+                std::cerr << " Creating file: " << fileName << std::endl;
             }
 
             std::ofstream fileStream(fileName + ".log");
-            fileStream << Utils::Join(group->expressions, "\n") << std::endl;
+            fileStream << Utils::Join(group->Merge(), "\n") << std::endl;
             fileStream.close();
         };
 
