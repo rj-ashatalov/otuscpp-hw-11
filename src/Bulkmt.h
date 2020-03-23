@@ -79,6 +79,11 @@ class Bulkmt
                 return;
             }
 
+            if (size == 1 && data == "\n")
+            {
+                return;
+            }
+
             std::stringstream buffer;
             buffer << data;
 
