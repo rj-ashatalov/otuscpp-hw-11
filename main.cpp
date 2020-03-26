@@ -4,19 +4,31 @@
 #include "async.h"
 
 int main(int, char *[]) {
-    //
     auto h1 = async::connect(3);
-    auto h2 = async::connect(3);
-    auto h3 = async::connect(3);
 
-    char data[] = "1\n\n2\n3\n4\n5\n6\n7\n8\n9\n";
+    char data[] = "1\n\n3\n4\n\n6\n7\n\n9\n10\n";
     async::receive(h1, data, 18);
-    async::receive(h2, data, 18);
-    async::receive(h3, data, 18);
-
+    async::receive(h1, "\n\n", 4);
+    for (auto c: data) {
+        auto cc = new decltype(c){c};
+        async::receive(h1, cc, sizeof(*cc));
+        delete cc;
+    }
     async::disconnect(h1);
-    async::disconnect(h2);
-    async::disconnect(h3);
+
+    //
+//    auto h1 = async::connect(3);
+//    auto h2 = async::connect(3);
+//    auto h3 = async::connect(3);
+//
+//    char data[] = "1\n\n2\n3\n4\n5\n6\n7\n8\n9\n";
+//    async::receive(h1, data, 18);
+//    async::receive(h2, data, 18);
+//    async::receive(h3, data, 18);
+//
+//    async::disconnect(h1);
+//    async::disconnect(h2);
+//    async::disconnect(h3);
 
     /*auto h1 = async::connect(3);
     auto h2 = async::connect(3);

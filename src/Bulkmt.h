@@ -79,30 +79,33 @@ class Bulkmt
                 return;
             }
 
-            if (size == 1 && data == "\n")
+            for (auto ch : data)
             {
-                return;
-            }
-
-            std::stringstream buffer;
-            buffer << data;
-
-            std::string command;
-            while (size > 0)
-            {
-                std::getline(buffer, command);
-//                std::cout << "Input is: " << command << " Processing... " << std::endl;
-                Execute(command);
-                size = (command.size() + 1) >= size? 0u : size - (command.size() + 1);
+                if (ch != '\n')
+                {
+                    _line << ch;
+                }
+                else
+                {
+                    Execute(_line.str());
+                    _line.str("");
+                }
             }
         }
 
         void Finalize()
         {
+            auto&& command = _line.str();
+            if (command.size() > 0)
+            {
+                Execute(command);
+            }
             _currentState->Finalize();
         }
 
         int commandBufCount;
     private:
         std::shared_ptr<IInterpreterState> _currentState;
+
+        std::stringstream _line;
 };
